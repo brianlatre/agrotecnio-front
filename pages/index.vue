@@ -18,6 +18,9 @@ onMounted(() => {
         </div>
 
         <template v-else>
+            <ClientOnly>
+                <AppMap />
+            </ClientOnly>
             <v-container fluid class="fill-height pa-5 d-flex flex-column" style="pointer-events: none; z-index: 10;">
                 <AppHeader class="mx-auto" style="pointer-events: auto; max-width: 1200px; width: 95%;" />
                 <v-spacer />
