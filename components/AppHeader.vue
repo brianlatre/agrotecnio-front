@@ -11,7 +11,8 @@
   >
     <div class="d-flex align-center">
       <div class="text-h5 font-weight-bold" :style="{ color: '#1a4d2e' }">
-        <span class="mr-2 text-h4">🐷</span>
+        <!-- <span class="mr-2 text-h4">🐷</span> -->
+        <span class="mr-2 text-h4"><v-icon color="pink">mdi-pig</v-icon></span>
         Smart Pig Logistics
       </div>
       <div class="text-caption text-medium-emphasis ml-3">

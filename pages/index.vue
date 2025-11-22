@@ -28,13 +28,3 @@ onMounted(() => {
         
     </v-app>
 </template>
-
-
-<style scoped>
-.v-card, .v-sheet {
-  backdrop-filter: blur(12px);
-  background-color: rgba(255, 255, 255, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 20px;
-}
-</style>

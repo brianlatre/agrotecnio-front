@@ -1,3 +1,0 @@
-<template>
-    <AppMapaTest />
-</template>
