@@ -1,8 +1,10 @@
 import vuetify, { transformAssetUrls } from 'vite-plugin-vuetify'
+
 export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
   ],
+  css: [],
   nitro: {
     devProxy: {
       "/api/v1": "http://localhost:8000/api/v1",

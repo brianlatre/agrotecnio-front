@@ -10,8 +10,15 @@ interface InitApiData {
   prices: { base: number; diesel_s: number };
 }
 
+const MAX_DAYS = 10;
+const GROWTH_RATE = 0.9;
+const PENALTY_HIGH = 0.20;
+const PENALTY_LOW = 0.15;
+const TRUCK_LARGE_PRICE = 1.25;
+const TRUCK_FIXED_COST = 2000;
+
 export const useSimulationStore = defineStore('simulation', () => {
-  const { CONFIG, updateFarmWeights, nextDayLogic, getDistance } = useSimulationLogic();
+  const { updateFarmWeights, nextDayLogic, getDistance } = useSimulationLogic();
 
   // Estado
   const day = ref<number>(0);
@@ -20,6 +27,22 @@ export const useSimulationStore = defineStore('simulation', () => {
   const farms = ref<Farm[]>([]);
   const routes = ref<Route[]>([]);
   const isLoading = ref<boolean>(false); 
+
+
+  const slaughterhouse = ref<InitApiData['slaughterhouse'] & { name: string }>({ id: 'S0', lat: 0, lng: 0, capacity: 0, name: 'Cargando...' });
+  const prices = ref<InitApiData['prices']>({ base: 0, diesel_s: 0 });
+
+
+  const fullConfig = computed(() => ({
+      maxDays: MAX_DAYS,
+      growthRate: GROWTH_RATE,
+      penaltyHigh: PENALTY_HIGH,
+      penaltyLow: PENALTY_LOW,
+      truckLargePrice: TRUCK_LARGE_PRICE,
+      truckFixedCost: TRUCK_FIXED_COST,
+      slaughterhouse: slaughterhouse.value,
+      prices: prices.value
+  }));
 
  
 
@@ -54,10 +77,27 @@ export const useSimulationStore = defineStore('simulation', () => {
   }
 
 
+  function nextDay() {
+    if (day.value >= MAX_DAYS) {
+      // ...
+      return;
+    }
+
+    day.value++;
+    const currentConfig = fullConfig.value; 
+    
+    updateFarmWeights(farms.value, day.value, GROWTH_RATE);
+
+    const result = nextDayLogic(farms.value, day.value, currentConfig);
+
+  }
+
 
   return { 
-    farms,
-    initSimulationFromApi,
-    isLoading
+    day, isRunning, isLoading, logs, farms, routes, 
+    slaughterhouse,
+    prices, 
+    fullConfig,
+    initSimulationFromApi, nextDay
   };
 });
