@@ -19,7 +19,8 @@ export const useSimulationStore = defineStore('simulation', () => {
   const logs = ref<LogEntry[]>([]);
   const farms = ref<Farm[]>([]);
   const routes = ref<Route[]>([]);
-  const isLoading = ref<boolean>(false); 
+  const isLoading = ref<boolean>(false);
+  const totalCost = ref<number>(0);
 
  
 
@@ -59,6 +60,7 @@ export const useSimulationStore = defineStore('simulation', () => {
     farms,
     initSimulationFromApi,
     isLoading,
-    logs
+    logs,
+    totalCost
   };
 });

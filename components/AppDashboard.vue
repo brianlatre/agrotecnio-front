@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppKpi from './AppKpi.vue';
 import AppLogs from './AppLogs.vue';
 </script>
 
@@ -9,7 +10,7 @@ import AppLogs from './AppLogs.vue';
         rounded="xl"
     >
         <!-- Sección de KPIs -->
-        
+        <AppKpi />
 
         <!-- Divisor -->
         <v-divider class="mx-6" />
