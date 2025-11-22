@@ -58,6 +58,7 @@ export const useSimulationStore = defineStore('simulation', () => {
   return { 
     farms,
     initSimulationFromApi,
-    isLoading
+    isLoading,
+    logs
   };
 });
