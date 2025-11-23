@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { LMap, LTileLayer, LMarker, LIcon, LPopup, LPolyline } from '@vue-leaflet/vue-leaflet';
+import { LMap, LTileLayer, LMarker, LIcon, LPolyline, LTooltip } from '@vue-leaflet/vue-leaflet';
 import { useSimulationStore } from '@/stores/simulationStore';
 import { ref, nextTick, watch } from 'vue';
 import type * as Leaflet from 'leaflet';
+import type { Farm, Route } from '@/types/index';
 
 interface LMapComponent {
   leafletObject: Leaflet.Map;
@@ -13,13 +14,9 @@ const mapRef = ref<LMapComponent | null>(null);
 
 const routeColors = ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#059669'];
 
-// Iconos por defecto de Leaflet (desde CDN)
 const baseMarkerIconUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png';
 const baseMarkerShadowUrl = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png';
 
-/**
- * Recentrar mapa cuando tengamos coordenadas del matadero
- */
 watch(
   () => store.slaughterhouse.lat,
   (newLat) => {
@@ -36,48 +33,31 @@ watch(
   { immediate: true }
 );
 
-/**
- * Convierte la ruta en puntos Leaflet.
- * Si el backend manda route.path = [[lat, lon], ...] lo usamos directo.
- * Si no, reconstruimos a partir de route.farms como fallback.
- */
-const getRoutePoints = (route: any): Leaflet.LatLngTuple[] => {
-  if (Array.isArray(route.path) && route.path.length > 0) {
-    return route.path.map(([lat, lng]: [number, number]) => [lat, lng]);
-  }
 
-  if (Array.isArray(route.farms)) {
-    const sh = store.slaughterhouse;
-    const pts: Leaflet.LatLngTuple[] = [];
-    pts.push([sh.lat, sh.lng]);
-    route.farms.forEach((f: any) => pts.push([f.lat, f.lng]));
-    pts.push([sh.lat, sh.lng]);
-    return pts;
-  }
+const getRoutePoints = (route: Route): Leaflet.LatLngTuple[] => {
+    const slaughterhouseLocation = store.slaughterhouse; 
+    const points: Leaflet.LatLngTuple[] = [];
 
-  return [];
+    // Salida y Regreso del Matadero
+    points.push([slaughterhouseLocation.lat, slaughterhouseLocation.lng]);
+    route.farms.forEach(f => points.push([f.lat, f.lng]));
+    points.push([slaughterhouseLocation.lat, slaughterhouseLocation.lng]);
+    
+    return points;
 };
 
-/**
- * Clase CSS según estado de la granja
- */
-const getFarmMarkerClass = (farm: any) => {
-  let statusClass = 'growing';
 
-  if (farm.status === 'visited' || farm.visitedThisWeek) {
-    statusClass = 'visited';
-  }
-
-  if (farm.status === 'empty' || farm.pigs === 0) {
-    statusClass = 'empty';
-  }
-
+const getFarmMarkerClass = (farm: Farm) => {
+  let statusClass = 'growing'; // Amarillo por defecto (creciendo)
+  // Verde si está en el rango óptimo
+  if (farm.avgWeight >= 105 && farm.avgWeight <= 118) statusClass = 'ready';
+  // Gris si ya fue visitada esta semana
+  if (farm.visitedThisWeek) statusClass = 'visited';
+  
   return `custom-marker-farm ${statusClass}`;
 };
 
-/**
- * Estilo visual de cada ruta
- */
+
 const getRouteOptions = (index: number) => ({
   color: routeColors[index % routeColors.length],
   weight: 4,
@@ -116,10 +96,10 @@ const getRouteOptions = (index: number) => ({
             :icon-anchor="[12, 41]"
             class-name="custom-marker-slaughter"
           />
-          <LPopup>
+          <LTooltip>
             <b>🏭 {{ store.slaughterhouse.name || 'Matadero' }}</b><br />
             Capacidad: {{ store.slaughterhouse.capacity }} cerdos / día
-          </LPopup>
+          </LTooltip>
         </LMarker>
 
         <!-- GRANJAS -->
@@ -135,12 +115,12 @@ const getRouteOptions = (index: number) => ({
             :icon-anchor="[10, 32]"
             :class-name="getFarmMarkerClass(farm)"
           />
-          <LPopup>
+          <LTooltip>
             <b>🐷 Granja {{ farm.id }}</b><br />
             Cerdos: {{ farm.pigs ?? '?' }}<br />
             Peso medio: {{ farm.avgWeight?.toFixed ? farm.avgWeight.toFixed(1) : farm.avgWeight }} kg<br />
             Estado: {{ farm.status || (farm.visitedThisWeek ? 'visited' : 'growing') }}
-          </LPopup>
+          </LTooltip>
         </LMarker>
 
         <!-- RUTAS DEL DÍA -->
@@ -160,7 +140,6 @@ const getRouteOptions = (index: number) => ({
   position: absolute;
   top: 0;
   left: 0;
-  /* o inset: 0; */
   width: 100%;
   height: 100%;
   z-index: 0;
@@ -176,18 +155,20 @@ const getRouteOptions = (index: number) => ({
 /* GRANJAS base */
 .custom-marker-farm {
   /* mismo icono base, pero podemos tintarlo con filters */
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 /* Estados de granjas */
 .custom-marker-farm.growing {
-  filter: hue-rotate(80deg) saturate(1.6);   /* verde-ish */
+  filter: hue-rotate(80deg) saturate(1.6);
 }
 
 .custom-marker-farm.visited {
-  filter: hue-rotate(190deg) saturate(1.6);  /* azul-ish */
+  filter: hue-rotate(190deg) saturate(1.6);
 }
 
 .custom-marker-farm.empty {
-  filter: grayscale(1) brightness(0.8);      /* gris */
+  filter: grayscale(1) brightness(0.8);
 }
 </style>

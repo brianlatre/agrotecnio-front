@@ -20,21 +20,9 @@
       </div>
     </div>
 
-    <div class="d-flex align-center gap-4">
-      <v-chip color="blue-grey-lighten-4" class="font-weight-bold">
-        Día {{ store.day }} / {{ store.maxDays }}
-      </v-chip>
-      
-      <v-btn 
-        id="btn-simulate"
-        color="#1a4d2e"
-        size="large"
-        rounded="xl"
-        class="text-white font-weight-bold"
-        :disabled="!store.isRunning"
-        @click="store.nextDay"
-      >
-        {{ store.isRunning ? 'Simular Día' : 'Fin' }}
+    <div class="d-flex align-center">
+      <v-btn icon color="grey-darken-2" variant="text" size="large">
+        <v-icon>mdi-menu</v-icon>
       </v-btn>
     </div>
   </v-sheet>
