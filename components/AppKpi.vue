@@ -3,6 +3,19 @@ import { useSimulationStore } from '@/stores/simulationStore';
 
 const store = useSimulationStore();
 
+const formatCurrency = (value: number) => {
+    return value.toLocaleString('es-ES', { 
+        style: 'currency', 
+        currency: 'EUR', 
+        maximumFractionDigits: 0,
+        minimumFractionDigits: 0 
+    });
+};
+
+const totalCostDisplay = computed(() => {
+    return formatCurrency(store.totalCost); 
+});
+
 </script>
 
 <template>
@@ -13,7 +26,7 @@ const store = useSimulationStore();
             <!-- Beneficio Neto -->
             <v-card class="kpi-card" elevation="0">
                 <div class="kpi-value text-h6 font-weight-bold" :style="{ color: '#1a4d2e' }">
-                    {{ store.netProfit }}
+                    {{ formatCurrency(store.netProfit) }}
                 </div>
                 <div class="kpi-label text-caption text-grey-darken-1">Beneficio Neto</div>
             </v-card>
